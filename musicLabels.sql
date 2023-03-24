@@ -333,4 +333,9 @@ BEGIN
 END;
 DELIMITER ;
 
+USE music_library;
 
+SELECT * FROM subscriber;
+
+UPDATE subscriber 
+SET addedBy = 'Davor';
