@@ -294,6 +294,9 @@ WHERE a.id IS NULL AND s.id IS NULL
 ORDER BY Subscriber DESC;
 
 -- TRIGGER
+
+USE music_library;
+
 GO
 CREATE TRIGGER checkSubscribtion
 ON subscriber
@@ -313,7 +316,7 @@ END;
 GO
 CREATE TRIGGER onUpdate_artist
 ON artist
-INSTEAD OF UPDATE
+AFTER UPDATE
 AS
 BEGIN
   UPDATE artist
@@ -321,3 +324,36 @@ BEGIN
   FROM artist
   INNER JOIN inserted ON artist.id = inserted.id;
 END;
+
+GO
+CREATE TRIGGER onUpdate_song
+ON song
+AFTER UPDATE
+AS
+BEGIN
+  UPDATE song
+  SET modifiedDate = GETDATE()
+  FROM song
+  INNER JOIN inserted ON song.id = inserted.id;
+END;
+
+--INSERT INTO
+GO
+SELECT * FROM song;
+
+USE music_library;
+
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+
+EXEC sp_configure 'Ad Hoc Distributed Queries', 1;
+RECONFIGURE;
+
+EXEC sp_configure 'Ad Hoc Distributed Queries';
+
+
+INSERT INTO song (name, release_year)
+SELECT film.Title, TRY_CONVERT(INT, film.Year)
+FROM film;
+
+SELECT * FROM song;
