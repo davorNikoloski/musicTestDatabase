@@ -357,3 +357,61 @@ SELECT film.Title, TRY_CONVERT(INT, film.Year)
 FROM film;
 
 SELECT * FROM song;
+
+
+--Staging scheme
+
+USE music_library; 
+
+GO
+CREATE SCHEMA staging;
+
+GO
+SELECT *
+INTO staging.stg_film
+FROM film
+
+	--Stored Procedure
+	GO
+	CREATE PROCEDURE sp_PopularityCheck
+	AS
+	BEGIN
+		SET NOCOUNT ON;
+		DELETE FROM staging.stg_film
+		WHERE TRY_CONVERT(INT,popularity) < 50;
+	END
+
+
+SELECT * FROM staging.stg_film;
+
+ALTER TABLE staging.stg_film
+ADD id INT NOT NULL IDENTITY(1,1)
+
+ALTER TABLE staging.stg_film
+ADD CONSTRAINT PK_staging_film PRIMARY KEY (id)
+
+EXEC sp_PopularityCheck;
+
+ALTER TABLE song ADD popularity INT;
+
+UPDATE song
+SET song.popularity = TRY_CONVERT(INT, staging.stg_film.Popularity)
+FROM song
+JOIN staging.stg_film ON song.name = staging.stg_film.Title;
+
+
+SELECT * FROM song;
+SELECT * FROM staging.stg_film;
+
+UPDATE song
+SET createdBy = 'John Doe';
+
+
+--TEST modifiedDate
+
+GO
+UPDATE song
+SET name = 'Breathe 2'
+WHERE id = 1;
+
+SELECT * FROM song;
